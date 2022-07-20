@@ -167,29 +167,29 @@ void print_revision(const char *progname,const char *revision) {
 
 int create_dhcp_socket(void) {
 
-    int DHCPServerSocket;
+    int DHCPClientSock;
 
     int flag = 1;
 
-    struct sockaddr_in server;
+    struct sockaddr_in client;
 
     struct ifreq interface;
 
-    bzero(&server, sizeof(server));
+    bzero(&client, sizeof(client));
 
-    server.sin_family = AF_INET;
+    client.sin_family = AF_INET;
 
-    server.sin_addr.s_addr = INADDR_ANY;
+    client.sin_addr.s_addr = INADDR_ANY;
 
-    server.sin_port = htons(67);
+    client.sin_port = htons(67);
 
-    bzero(&server.sin_zero ,sizeof(server.sin_zero));
+    bzero(&client.sin_zero ,sizeof(client.sin_zero));
 
-    DHCPServerSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    DHCPClientSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-    if(DHCPServerSocket < 0) {
+    if(DHCPClientSock < 0) {
 
-        printf("%s\n", "Couldn't Create The DHCP Server Socket!");
+        printf("%s\n", "Couldn't Create The DHCP Client Socket!");
 
         exit(0);
 
@@ -199,11 +199,11 @@ int create_dhcp_socket(void) {
 
         /* Set The REUSE Address Flag So We Don't Get Errors When Restarting */
 
-        int sockOptionsResult = setsockopt(DHCPServerSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof(flag));
+        int sockOptionsResult = setsockopt(DHCPClientSock, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof(flag));
 
         if(sockOptionsResult < 0) {
 
-            printf("%s\n", "Couldn't Set The REUSE Socket Option On The DHCP Server Socket!");
+            printf("%s\n", "Couldn't Set The REUSE Socket Option On The DHCP Client Socket!");
 
             exit(0);
 
@@ -213,11 +213,11 @@ int create_dhcp_socket(void) {
         
             /* Set The Broadbast Option So We Can Listen To DHCP Broadcast Messages */
 
-            int secondSockOptionResult = setsockopt(DHCPServerSocket, SOL_SOCKET, SO_BROADCAST, (char *)&flag, sizeof flag);
+            int secondSockOptionResult = setsockopt(DHCPClientSock, SOL_SOCKET, SO_BROADCAST, (char *)&flag, sizeof flag);
 
             if(secondSockOptionResult < 0) {
 
-                printf("%s\n", "Couldn't Set The BROADCAST Socket Option On The DHCP Server Socket!");
+                printf("%s\n", "Couldn't Set The BROADCAST Socket Option On The DHCP DHCPClientSock Socket!");
 
                 exit(0);
 
@@ -225,11 +225,11 @@ int create_dhcp_socket(void) {
 
             else {
 
-                int DHCPServerSocketBindResult = bind(DHCPServerSocket, (struct sockaddr *)&server, sizeof(server));
+                int DHCPClientSockBindResult = bind(DHCPClientSock, (struct sockaddr *)&client, sizeof(client));
 
-                if(DHCPServerSocketBindResult < 0) {
+                if(DHCPClientSockBindResult < 0) {
                 
-                    printf("%s\n", "Couldn't Bind The DHCP Server Socket!");
+                    printf("%s\n", "Couldn't Bind The DHCP Client Socket!");
 
                     exit(0);
 
@@ -238,7 +238,7 @@ int create_dhcp_socket(void) {
                 else {
 
 
-                    return DHCPServerSocket;
+                    return DHCPClientSock;
                 }
 
 
@@ -303,9 +303,9 @@ void send_dhcp_packet(int sock, unsigned int *macAddress) {
 
     srand(time(NULL));
 
-	packet_xid = random();
+    packet_xid = random();
 
-	discover_packet.xid = htonl(packet_xid);
+    discover_packet.xid = htonl(packet_xid);
 
     ntohl(discover_packet.xid);
 
@@ -347,11 +347,11 @@ void send_dhcp_packet(int sock, unsigned int *macAddress) {
 
 int main() {
 
-    int r = create_dhcp_socket();
+    int DHCPClientSocket = create_dhcp_socket();
 
-    unsigned int *macAddress = get_hardware_address(r, network_interface_name);
+    unsigned int *macAddress = get_hardware_address(DHCPClientSocket, network_interface_name);
 
-    send_dhcp_packet(r, macAddress);
+    send_dhcp_packet(DHCPClientSocket, macAddress);
 
 
 
