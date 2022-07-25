@@ -158,11 +158,6 @@ int received_requested_address=false;
 int verbose=0;
 struct in_addr requested_address;
 
-void print_revision(const char *progname,const char *revision) {
-
-	printf("Program: %s %s\n",progname,revision);
-
-}
 
 
 int create_dhcp_socket(void) {
