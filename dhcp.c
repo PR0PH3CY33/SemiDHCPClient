@@ -199,7 +199,9 @@ int create_dhcp_socket(void) {
         if(sockOptionsResult < 0) {
 
             printf("%s\n", "Couldn't Set The REUSE Socket Option On The DHCP Client Socket!");
-
+		
+	    close(DHCPClientSock);	
+		
             exit(0);
 
         }
@@ -213,6 +215,8 @@ int create_dhcp_socket(void) {
             if(secondSockOptionResult < 0) {
 
                 printf("%s\n", "Couldn't Set The BROADCAST Socket Option On The DHCP DHCPClientSock Socket!");
+		    
+	 	close(DHCPClientSock);
 
                 exit(0);
 
@@ -226,6 +230,8 @@ int create_dhcp_socket(void) {
                 
                     printf("%s\n", "Couldn't Bind The DHCP Client Socket!");
 
+		    close(DHCPClientSock);	
+			
                     exit(0);
 
                 }
